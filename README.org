@@ -1,3 +1,13 @@
 * pyFasecolda
 
-Web scrapping web page [[https://sistemas.fasecolda.com/rldatos/][Sistema General de Riesgos Laborales]]
+Web scrapping FASECOLDA's page web [[https://sistemas.fasecolda.com/rldatos/Reportes/xClaseGrupoActividad.aspx][Sistema General de Riesgos Laborales]].
+
+From FASECOLDA's main page web:
+#+BEGIN_QUOTE
+La Cámara Técnica de Riesgos Laborales de FASECOLDA, pone a disposición del público en general el Sistema de Consulta de Información en Riesgos Laborales (RL Datos) que permite tener acceso a información detallada y actualizada acerca del comportamiento de las principales variables del Sistema General de Riesgos Laborales en Colombia. Al consultar este aplicativo, se podrá obtener información acerca de empresas y trabajadores afiliados, accidentes de trabajo y enfermedades laborales calificadas, así mismo sobre las secuelas de estos eventos como son las indemnizaciones por Incapacidad Permanente Parcial, Pensiones de Invalidez y Muertes de origen laboral. Todo lo anterior podrá ser consultado según la distribución temporal (año y mes), por Actividad Económica y Sector Económico, por Departamento y Municipio, por Clase de Riesgo y por Administradora de Riesgos Laborales. Esperamos que la información que se consulte en RL Datos, pueda servir como herramienta para estudiantes, profesores, Administradoras del Sistema de Seguridad Social, entidades territoriales y al público en general, interesado en el comportamiento y seguimiento del Sistema General de Riesgos Laborales Colombiano.
+#+END_QUOTE
+
+* de que va la pagina de fasecolda
+
+
+* como funcion
