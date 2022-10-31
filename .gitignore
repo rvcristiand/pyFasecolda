@@ -1,1 +1,5 @@
 env/
+*.xls
+*.csv
+__pycache__/
+*.log
