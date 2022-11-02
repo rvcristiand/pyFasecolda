@@ -1,0 +1,33 @@
+{
+    "query": {
+        "year": "2022",
+        "departamento": "BOGOTA",
+        "sector_economico": "Inmobiliario",
+        "month": "Octubre",
+        "municipio": "TODOS",
+        "actividad_economica": "2749201"
+    },
+    "results": {
+        "headers": [
+            "arl",
+            "nro_empresas",
+            "porcentaje_nro_empresas",
+            "nro_trabajadores_dependientes",
+            "nro_trabajadores_independientes",
+            "total_trabajadores",
+            "porcentaje_total_trabajadores",
+            "nro_accidentes_trabajo_calificadas",
+            "nro_enfermedades_laborales_calificadas",
+            "muertes_calificadas_accidentes_trabajo",
+            "muertes_calificadas_enfermedades_laborales",
+            "total_muertes_calificadas",
+            "nro_pensiones_invalidez_accidentes_trabajo",
+            "nro_pensiones_invalidez_enfermedades_laborales",
+            "total_pensiones_invalidez",
+            "nro_indemnizaciones_IPP_pagadas_AT",
+            "nro_indemnizaciones_IPP_pagadas_EL",
+            "total_indemnizaciones_IPP_pagadas"
+        ],
+        "data": {}
+    }
+}

@@ -1,5 +1,7 @@
 import os
 
+import json
+
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.keys import Keys
@@ -8,6 +10,8 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+from bs4 import BeautifulSoup
+
 import xlwings as xw
 
 import time
@@ -15,6 +19,43 @@ import pandas as pd
 import numpy as np
 
 # dictionaries
+departamentos_dict = {
+    'TODOS': 1,
+    'AMAZONAS': 2,
+    'ANTIOQUIA': 3,
+    'ARAUCA': 4,
+    'ATLANTICO': 5,
+    'BOGOTA': 6,
+    'BOLIVAR': 7,
+    'BOYACA': 8,
+    'CALDAS': 9,
+    'CAQUETA': 10,
+    'CASANARE': 11,
+    'CAUCA': 12,
+    'CESAR': 13,
+    'CHOCO': 14,
+    'CORDOBA': 15,
+    'CUNDINAMARCA': 16,
+    'GUAINIA': 17,
+    'GUAVIARE': 18,
+    'HUILA': 19,
+    'LA GUAJIRA': 20,
+    'MAGDALENA': 21,
+    'META': 22,
+    'NARIÑO': 23,
+    'NORTE SANTANDER': 24,
+    'PUTUMAYO': 25,
+    'QUINDIO': 26,
+    'RISARALDA': 27,
+    'SAN ANDRES': 28,
+    'SANTANDER': 29,
+    'SUCRE': 30,
+    'TOLIMA': 31,
+    'VALLE': 32,
+    'VAUPES': 33,
+    'VICHADA': 34,
+}
+
 actividades_economicas_dict = {
     'TODAS': 1,
     '1000010': 2,
@@ -178,10 +219,12 @@ def fix_files():
 
 
 def download_reports(actividad_economica, year):
+    # TODO redo docstring
     """Download reports from Sistema General de Riesgos Laborales FASECOLDA.
 
     Download reports for all months and all departamentos from FASECOLDA's page
-    web Sistema General de Riesgos Laborales, for Sector economico Inmobiliario.
+    web Sistema General de Riesgos Laborales, for Sector economico
+    Inmobiliario.
 
     The downloaded files are stored at './Raw_dataset' folder.
 
@@ -195,63 +238,179 @@ def download_reports(actividad_economica, year):
     firefoxOptions.add_argument('--disable-extensions')
 
     # change download directory
-    firefoxOptions.set_preference('browser.download.folderList', 2)
-    firefoxOptions.set_preference("browser.download.dir", os.path.join(os.getcwd(), "Raw_dataset"))
+    # TODO make Raw_dataset path a global variable
+    raw_path = os.path.join(os.getcwd(), 'Raw_dataset')
+    # firefoxOptions.set_preference('browser.download.folderList', 2)
+    # firefoxOptions.set_preference('browser.download.dir', raw_path)
 
     # create a firefox instance
-    driver = webdriver.Firefox(executable_path="./geckodriver", options=firefoxOptions)
+    kargs = {
+        'executable_path': "./geckodriver",
+        'options': firefoxOptions
+    }
+    driver = webdriver.Firefox(**kargs)
 
     # select the URL
-    driver.get('https://sistemas.fasecolda.com/rldatos/Reportes/xCompania.aspx')
+    url = 'https://sistemas.fasecolda.com/rldatos/Reportes/xCompania.aspx'
+    driver.get(url)
 
     # select year
-    Icon_year = driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_rcbYears_Input').click()
+    id = 'ctl00_ContentPlaceHolder1_rcbYears_Input'
+    iconYear = driver.find_element(By.ID, id)
+    iconYear.click()
+    # TODO find alternatives to sleep
     time.sleep(1)
-    Year=driver.find_element(By.XPATH, f'//*[@id="ctl00_ContentPlaceHolder1_rcbYears_DropDown"]/div/ul/li[{year_dict[year]}]').click()
+    # year
+    xpath = '//*[@id="ctl00_ContentPlaceHolder1_rcbYears_DropDown"]/div/ul'
+    xpath+=f'/li[{year_dict[year]}]'
+    year = driver.find_element(By.XPATH, xpath)
+    year.click()
+    # TODO find alternatives to sleep
     time.sleep(1)
-    
+
     # sector economico
-    Icon_Sec=driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_rcbActEconomica_Input').click()
+    id = 'ctl00_ContentPlaceHolder1_rcbActEconomica_Input'
+    iconSec = driver.find_element(By.ID, id)
+    iconSec.click()
+    # TODO find alternatives to sleep
     time.sleep(0.5)
-    # select inmobiliario
-    Sec=driver.find_element(By.XPATH, '//*//*[@id="ctl00_ContentPlaceHolder1_rcbActEconomica_DropDown"]/div/ul/li[11]').click()
+    # inmobiliario
+    xpath = '//*//*[@id="ctl00_ContentPlaceHolder1_rcbActEconomica_DropDown"]'
+    xpath+= '/div/ul/li[11]'
+    sec = driver.find_element(By.XPATH, xpath)
+    sec.click()
+    # TODO find alternatives to sleep
     time.sleep(0.5)
 
     # select actividad economica
-    Icon_Act=driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_rcbSectEconomico_Input').click()
+    id = 'ctl00_ContentPlaceHolder1_rcbSectEconomico_Input'
+    iconAct = driver.find_element(By.ID, id)
+    iconAct.click()
+    # TODO find alternatives to sleep
     time.sleep(0.5)
-    Act=driver.find_element(By.XPATH, f'//*[@id="ctl00_ContentPlaceHolder1_rcbSectEconomico_DropDown"]/div/ul/li[{actividades_economicas_dict[actividad_economica]}]').click()
+    # actividad economica
+    xpath = '//*[@id="ctl00_ContentPlaceHolder1_rcbSectEconomico_DropDown"]'
+    xpath+=f'/div/ul/li[{actividades_economicas_dict[actividad_economica]}]'
+    act = driver.find_element(By.XPATH, xpath)
+    act.click()
+    # TODO find alternatives to sleep
     time.sleep(0.5)
 
     for m in range(2,14):
         # select month
-        Icon_Month=driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_rcbMeses_Input').click()
+        xpath = '//*[@id="ctl00_ContentPlaceHolder1_rcbMeses_Input"]'
+        iconMonth = driver.find_element(By.XPATH, xpath)
+
+        iconMonth.click()
+        # TODO find alternatives to sleep
         time.sleep(1)
-        Month=driver.find_element(By.XPATH, f'/html/body/form/div[1]/div/div/ul/li[{m}]').click()
+        # month
+        xpath = f'/html/body/form/div[1]/div/div/ul/li[{m}]'
+        month = driver.find_element(By.XPATH, xpath)
+        month.click()
+        # TODO find alternatives to sleep
         time.sleep(1)
 
-        for d in range (2,35):
+        for d in [6]: # range(2,35): #
+            # select departamento
+            id = 'ctl00_ContentPlaceHolder1_rcbDeptos_Input'
+            iconDpto = driver.find_element(By.ID, id)
+            iconDpto.click()
+            # TODO find alternatives to sleep
+            time.sleep(0.5)
             # departamento
-            Icon_Dpto=driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_rcbDeptos_Input').click()
+            xpath = '//*[@id="ctl00_ContentPlaceHolder1_rcbDeptos_DropDown"]'
+            xpath+=f'/div/ul/li[{d}]'
+            dpto = driver.find_element(By.XPATH, xpath)
+            dpto.click()
+            # TODO find alternatives to sleep
             time.sleep(0.5)
 
-            # municipios
-            Dpto=driver.find_element(By.XPATH, f'//*[@id="ctl00_ContentPlaceHolder1_rcbDeptos_DropDown"]/div/ul/li[{d}]').click()
-            time.sleep(0.5)
+            # # select municipio (TODOS)
+            # xpath = '//*[@id=\"ctl00_ContentPlaceHolder1_rcbCiudades_DropDown\"]'
+            # xpath+= '/div/ul/li[1]'
+            # loc = driver.find_element(By.XPATH, xpath)
+            # loc.click()
+            # # TODO find alternatives to sleep
+            # time.sleep(0.5)
 
             # consultar
-            Icon_submit=driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_Button1').click()
+            iconSubmit = driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_Button1')
+            iconSubmit.click()
+            # TODO find alternatives to sleep
             time.sleep(0.5)
 
-            # exportar como xls
-            path_xls=driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_repVieCompania_ReportToolbar_ExportGr_FormatList_DropDownList')
-            drop_xls =Select(path_xls)
-            drop_xls.select_by_value('XLS')
-            time.sleep(0.5)
+            # change iframe
+            driver.switch_to.frame(driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_repVieCompaniaReportFrame'))
 
-            # descargar
-            Icon_submit=driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_repVieCompania_ReportToolbar_ExportGr_Export').click()
-            time.sleep(0.5)
+            # beautifulsoup
+            page_source = driver.page_source
+            soup = BeautifulSoup(page_source, 'html.parser')
+
+            # content
+            content = soup.find(id='content')
+            # divs
+            divs = [div.string for div in content.find_all('div') if not div.string == '\n']
+
+            # scraping
+            headers = divs[1:19]
+            data = divs[19:-14]
+            query = divs[-14:-2]
+
+            # split data
+            rows = []
+            if not len(data) == 1:
+                len_headers = 18
+                for i in range(len(data)//len_headers):
+                    rows.append(data[i*len_headers:(i+1)*len_headers])
+
+            json_ = {}
+            json_query = {
+                'year': query[3],
+                'departamento': query[4],
+                'sector_economico': query[5],
+                'month': query[9],
+                'municipio': query[10],
+                'actividad_economica': query[11]
+            }
+            json_['query'] = json_query
+            
+            json_results = json_['results'] = {}
+            json_results['headers'] = [
+                'arl',
+                'nro_empresas',
+                'porcentaje_nro_empresas',
+                'nro_trabajadores_dependientes',
+                'nro_trabajadores_independientes',
+                'total_trabajadores',
+                'porcentaje_total_trabajadores',
+                'nro_accidentes_trabajo_calificadas',
+                'nro_enfermedades_laborales_calificadas',
+                'muertes_calificadas_accidentes_trabajo',
+                'muertes_calificadas_enfermedades_laborales',
+                'total_muertes_calificadas',
+                'nro_pensiones_invalidez_accidentes_trabajo',
+                'nro_pensiones_invalidez_enfermedades_laborales',
+                'total_pensiones_invalidez',
+                'nro_indemnizaciones_IPP_pagadas_AT',
+                'nro_indemnizaciones_IPP_pagadas_EL',
+                'total_indemnizaciones_IPP_pagadas'
+            ]
+            json_results['data'] = {row.pop(0).strip(): row for row in rows}
+
+            filename = f"{json_query['year']}-{json_query['month']}-"
+            filename+= f"{json_query['departamento']}-"
+            filename+= f"{json_query['municipio']}-"
+            filename+= f"{json_query['sector_economico']}-"
+            filename+= f"{json_query['actividad_economica']}"
+
+            filepath = os.path.join(raw_path, filename + '.json')
+
+            with open(filepath, 'w', encoding='utf-8') as fp:
+                fp.write(json.dumps(json_, indent=4))
+
+            # change iframe
+            driver.switch_to.default_content()
 
         print('Done m:', m)
 
