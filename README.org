@@ -9,6 +9,30 @@ La Cámara Técnica de Riesgos Laborales de FASECOLDA, pone a disposición del p
 ** Setup
 Clone this repo to your desktop and run =conda create --name pyFasecolda --file pyFasecolda.txt=.
 
+* TODO year, dep, mun
+* TODO script call depts
+* TODO concatate all files
+* TODO azure
+
+doit with beatifulsoap
+
+
+new def download_reports(departamento, actividad_economica, year): -> 
+one depts
+all municipios
+all months
+default
+
+
+def download_reports(actividad_economica, year):
+all depts
+all months
+default
+
+
+json
+
+
 * de que va la pagina de fasecolda
 
 
